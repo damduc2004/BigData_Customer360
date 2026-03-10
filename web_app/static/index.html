@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Behavior Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            display: flex
+        }
+        /* SIDEBAR */
+        
+        #sidebar {
+            width: 220px;
+            min-height: 100vh;
+            background: #1a1d2e;
+            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0
+        }
+        
+        #sidebar h2 {
+            color: #7c6af7;
+            font-size: 15px;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #2a2d3e
+        }
+        
+        #sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            transition: .2s
+        }
+        
+        #sidebar nav a:hover,
+        #sidebar nav a.active {
+            background: #2a2d3e;
+            color: #fff;
+            border-left: 3px solid #7c6af7
+        }
+        /* MAIN */
+        
+        #main {
+            margin-left: 220px;
+            padding: 28px;
+            flex: 1;
+            min-height: 100vh
+        }
+        
+        .page {
+            display: none
+        }
+        
+        .page.active {
+            display: block
+        }
+        
+        h1 {
+            font-size: 22px;
+            margin-bottom: 6px;
+            color: #fff
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 24px
+        }
+        /* KPI */
+        
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px
+        }
+        
+        .kpi {
+            background: #1a1d2e;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2d3e
+        }
+        
+        .kpi .label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px
+        }
+        
+        .kpi .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #7c6af7
+        }
+        
+        .kpi .sub {
+            font-size: 12px;
+            color: #4ade80;
+            margin-top: 4px
+        }
+        /* CHARTS */
+        
+        .chart-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px
+        }
+        
+        .col2 {
+            grid-template-columns: 1fr 1fr
+        }
+        
+        .col1 {
+            grid-template-columns: 1fr
+        }
+        
+        .card {
+            background: #1a1d2e;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2d3e
+        }
+        
+        .card h3 {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 16px
+        }
+        
+        .card canvas {
+            max-height: 280px
+        }
+        /* DIVIDER */
+        
+        hr {
+            border: none;
+            border-top: 1px solid #2a2d3e;
+            margin: 24px 0
+        }
+        /* LOADING */
+        
+        .loading {
+            text-align: center;
+            color: #555;
+            padding: 40px;
+            font-size: 13px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sidebar">
+        <h2>📺 User Behavior</h2>
+        <nav>
+            <a href="#" class="active" onclick="showPage('content',this)">🎬 Content Behavior</a>
+            <a href="#" onclick="showPage('search',this)">🔍 Search Behavior</a>
+            <a href="#" onclick="showPage('trend',this)">📈 Trend Analysis</a>
+            <a href="#" onclick="showPage('segment',this)">👤 Segmentation</a>
+        </nav>
+    </div>
+
+    <div id="main">
+
+        <!-- ═══════════════ CONTENT PAGE ═══════════════ -->
+        <div id="page-content" class="page active">
+            <h1>🎬 Content Behavior</h1>
+            <p class="subtitle">Phân tích hành vi xem nội dung từ log_content</p>
+            <div class="kpi-row">
+                <div class="kpi">
+                    <div class="label">Tổng Contracts</div>
+                    <div class="value" id="c-total">--</div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Active High</div>
+                    <div class="value" id="c-high">--</div>
+                    <div class="sub" id="c-high-pct"></div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Avg Thiết Bị</div>
+                    <div class="value" id="c-dev">--</div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Top MostWatch</div>
+                    <div class="value" style="font-size:16px" id="c-top">--</div>
+                </div>
+            </div>
+            <div class="chart-row col2">
+                <div class="card">
+                    <h3>Phân Bổ MostWatch</h3><canvas id="chart-mostwatch"></canvas></div>
+                <div class="card">
+                    <h3>Active High vs Low</h3><canvas id="chart-active"></canvas></div>
+            </div>
+            <div class="chart-row col1">
+                <div class="card">
+                    <h3>Tổng Watch-Time Theo Thể Loại (giờ)</h3><canvas id="chart-watchtime"></canvas></div>
+            </div>
+            <div class="chart-row col1">
+                <div class="card">
+                    <h3>Top 5 Taste Combination</h3><canvas id="chart-taste"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ SEARCH PAGE ═══════════════ -->
+        <div id="page-search" class="page">
+            <h1>🔍 Search Behavior</h1>
+            <p class="subtitle">Phân tích hành vi tìm kiếm từ log_search (T6–T7/2022)</p>
+            <div class="kpi-row">
+                <div class="kpi">
+                    <div class="label">Tổng Users</div>
+                    <div class="value" id="s-total">--</div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Giữ Nguyên Genre</div>
+                    <div class="value" id="s-unchanged">--</div>
+                    <div class="sub" id="s-unc-pct"></div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Đổi Genre</div>
+                    <div class="value" id="s-changed">--</div>
+                    <div class="sub" id="s-chg-pct"></div>
+                </div>
+                <div class="kpi">
+                    <div class="label">Tổng Keywords Unique</div>
+                    <div class="value">439k</div>
+                </div>
+            </div>
+            <div class="chart-row col2">
+                <div class="card">
+                    <h3>Genre Tháng 6</h3><canvas id="chart-genre-t6"></canvas></div>
+                <div class="card">
+                    <h3>Genre Tháng 7</h3><canvas id="chart-genre-t7"></canvas></div>
+            </div>
+            <div class="chart-row col2">
+                <div class="card">
+                    <h3>Top 10 Keyword Tháng 6</h3><canvas id="chart-kw-t6"></canvas></div>
+                <div class="card">
+                    <h3>Top 10 Keyword Tháng 7</h3><canvas id="chart-kw-t7"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ TREND PAGE ═══════════════ -->
+        <div id="page-trend" class="page">
+            <h1>📈 Trend Analysis</h1>
+            <p class="subtitle">Xu hướng thay đổi sở thích genre từ T6 → T7</p>
+            <div class="chart-row col1">
+                <div class="card">
+                    <h3>So Sánh Genre Giữa Tháng 6 & Tháng 7</h3><canvas id="chart-genre-cmp"></canvas></div>
+            </div>
+            <div class="chart-row col1">
+                <div class="card">
+                    <h3>Heatmap: Chuyển Đổi Genre T6 → T7</h3>
+                    <div id="heatmap-container" style="overflow-x:auto"></div>
+                </div>
+            </div>
+            <div class="chart-row col2">
+                <div class="card">
+                    <h3>Top 15 Chuỗi Thay Đổi Phổ Biến</h3><canvas id="chart-changes"></canvas></div>
+                <div class="card">
+                    <h3>Tỷ Lệ Thay Đổi / Giữ Nguyên</h3><canvas id="chart-ratio"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ SEGMENT PAGE ═══════════════ -->
+        <div id="page-segment" class="page">
+            <h1>👤 Customer Segmentation</h1>
+            <p class="subtitle">Phân khúc khách hàng dựa trên hành vi xem nội dung</p>
+            <div class="chart-row col2">
+                <div class="card">
+                    <h3>Phân Bổ Segment</h3><canvas id="chart-seg-pie"></canvas></div>
+                <div class="card">
+                    <h3>Số Lượng Theo Segment</h3><canvas id="chart-seg-bar"></canvas></div>
+            </div>
+            <div class="chart-row col1">
+                <div class="card">
+                    <h3>Mô Tả Các Phân Khúc</h3>
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px">
+                        <tr style="color:#7c6af7;border-bottom:1px solid #2a2d3e">
+                            <th style="padding:8px;text-align:left">Segment</th>
+                            <th style="padding:8px;text-align:left">Điều Kiện</th>
+                            <th style="padding:8px;text-align:left">Ý Nghĩa</th>
+                        </tr>
+                        <tr style="border-bottom:1px solid #2a2d3e">
+                            <td style="padding:8px">🔥 Heavy Viewer</td>
+                            <td style="padding:8px">Active = High</td>
+                            <td style="padding:8px">Khách hàng trung thành, xem nhiều</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #2a2d3e">
+                            <td style="padding:8px">🌍 Explorer</td>
+                            <td style="padding:8px">Active High + ≥3 thể loại</td>
+                            <td style="padding:8px">Xem đa dạng nội dung</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #2a2d3e">
+                            <td style="padding:8px">👨‍👩‍👧 Family</td>
+                            <td style="padding:8px">Devices > 3 + Thiếu Nhi > 0</td>
+                            <td style="padding:8px">Hộ gia đình có trẻ em</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px">💤 Light User</td>
+                            <td style="padding:8px">Còn lại</td>
+                            <td style="padding:8px">Ít tương tác, có nguy cơ rời bỏ</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- end main -->
+
+    <script>
+        const API = "http://localhost:5000";
+        const COLORS = ["#7c6af7", "#4ade80", "#f59e0b", "#f87171", "#38bdf8", "#e879f9", "#fb923c", "#a3e635", "#34d399", "#60a5fa", "#c084fc", "#fbbf24", "#f472b6", "#94a3b8"];
+
+        function showPage(name, el) {
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
+            document.getElementById("page-" + name).classList.add("active");
+            el.classList.add("active");
+        }
+
+        // ── Chart helpers ─────────────────────────────────────────────────────────────
+        function pie(id, labels, data) {
+            new Chart(document.getElementById(id), {
+                type: "doughnut",
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: COLORS,
+                        borderWidth: 1,
+                        borderColor: "#0f1117"
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: "right",
+                            labels: {
+                                color: "#ccc",
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        }
+
+        function barH(id, labels, data, label = "") {
+            new Chart(document.getElementById(id), {
+                type: "bar",
+                data: {
+                    labels,
+                    datasets: [{
+                        label,
+                        data,
+                        backgroundColor: COLORS,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: "y",
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: "#aaa"
+                            },
+                            grid: {
+                                color: "#2a2d3e"
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: "#ccc",
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        }
+
+        function barV(id, labels, data, label = "") {
+            new Chart(document.getElementById(id), {
+                type: "bar",
+                data: {
+                    labels,
+                    datasets: [{
+                        label,
+                        data,
+                        backgroundColor: COLORS,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: "#ccc"
+                            },
+                            grid: {
+                                color: "#2a2d3e"
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: "#aaa"
+                            },
+                            grid: {
+                                color: "#2a2d3e"
+                            }
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        }
+
+        // ── CONTENT ───────────────────────────────────────────────────────────────────
+        fetch(`${API}/api/content/kpi`).then(r => r.json()).then(d => {
+            document.getElementById("c-total").textContent = d.total_contracts.toLocaleString();
+            document.getElementById("c-high").textContent = d.active_high.toLocaleString();
+            document.getElementById("c-high-pct").textContent = d.active_high_pct + "%";
+            document.getElementById("c-dev").textContent = d.avg_devices;
+            document.getElementById("c-top").textContent = d.top_mostwatch;
+        });
+
+        fetch(`${API}/api/content/mostwatch`).then(r => r.json()).then(d => {
+            pie("chart-mostwatch", d.map(x => x.label), d.map(x => x.value));
+        });
+
+        fetch(`${API}/api/content/active`).then(r => r.json()).then(d => {
+            barV("chart-active", d.map(x => x.label), d.map(x => x.value));
+        });
+
+        fetch(`${API}/api/content/watchtime`).then(r => r.json()).then(d => {
+            barH("chart-watchtime", d.map(x => x.label), d.map(x => x.value), "Giờ xem");
+        });
+
+        fetch(`${API}/api/content/taste`).then(r => r.json()).then(d => {
+            barH("chart-taste", d.map(x => x.label), d.map(x => x.value));
+        });
+
+        // ── SEARCH ────────────────────────────────────────────────────────────────────
+        fetch(`${API}/api/search/kpi`).then(r => r.json()).then(d => {
+            document.getElementById("s-total").textContent = d.total_users.toLocaleString();
+            document.getElementById("s-unchanged").textContent = d.unchanged.toLocaleString();
+            document.getElementById("s-unc-pct").textContent = d.unchanged_pct + "%";
+            document.getElementById("s-changed").textContent = d.changed.toLocaleString();
+            document.getElementById("s-chg-pct").textContent = d.changed_pct + "%";
+        });
+
+        fetch(`${API}/api/search/genre`).then(r => r.json()).then(d => {
+            pie("chart-genre-t6", d.t6.map(x => x.label), d.t6.map(x => x.value));
+            pie("chart-genre-t7", d.t7.map(x => x.label), d.t7.map(x => x.value));
+        });
+
+        fetch(`${API}/api/search/keywords`).then(r => r.json()).then(d => {
+            barH("chart-kw-t6", d.t6.map(x => x.label), d.t6.map(x => x.value));
+            barH("chart-kw-t7", d.t7.map(x => x.label), d.t7.map(x => x.value));
+        });
+
+        // ── TREND ─────────────────────────────────────────────────────────────────────
+        fetch(`${API}/api/trend/genre_comparison`).then(r => r.json()).then(rows => {
+            const genres = [...new Set(rows.map(r => r.genre))];
+            const t6 = genres.map(g => {
+                const f = rows.find(r => r.period === 'Tháng 6' && r.genre === g);
+                return f ? f.value : 0;
+            });
+            const t7 = genres.map(g => {
+                const f = rows.find(r => r.period === 'Tháng 7' && r.genre === g);
+                return f ? f.value : 0;
+            });
+            new Chart(document.getElementById('chart-genre-cmp'), {
+                type: 'bar',
+                data: {
+                    labels: genres,
+                    datasets: [{
+                        label: 'Tháng 6',
+                        data: t6,
+                        backgroundColor: '#7c6af7',
+                        borderRadius: 4
+                    }, {
+                        label: 'Tháng 7',
+                        data: t7,
+                        backgroundColor: '#4ade80',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ccc'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#ccc'
+                            },
+                            grid: {
+                                color: '#2a2d3e'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#aaa'
+                            },
+                            grid: {
+                                color: '#2a2d3e'
+                            }
+                        }
+                    },
+                    responsive: true
+                }
+            });
+        });
+
+        fetch(`${API}/api/trend/heatmap`).then(r => r.json()).then(rows => {
+            const sources = [...new Set(rows.map(r => r.source))];
+            const targets = [...new Set(rows.map(r => r.target))];
+            const lookup = {};
+            rows.forEach(r => {
+                lookup[r.source + '|' + r.target] = r.value;
+            });
+            const maxVal = Math.max(...rows.map(r => r.value), 1);
+            let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px">';
+            html += '<tr><th style="padding:6px;color:#888">T6 \\ T7</th>';
+            targets.forEach(t => {
+                html += '<th style="padding:6px;color:#ccc;text-align:center">' + t + '</th>';
+            });
+            html += '</tr>';
+            sources.forEach(s => {
+                html += '<tr><td style="padding:6px;color:#ccc;font-weight:600">' + s + '</td>';
+                targets.forEach(t => {
+                    const v = lookup[s + '|' + t] || 0;
+                    const opacity = v > 0 ? Math.max(0.15, v / maxVal) : 0;
+                    html += '<td style="padding:6px;text-align:center;background:rgba(124,106,247,' + opacity.toFixed(2) + ');color:#fff">' + (v || '') + '</td>';
+                });
+                html += '</tr>';
+            });
+            html += '</table>';
+            document.getElementById('heatmap-container').innerHTML = html;
+        });
+
+        fetch(`${API}/api/trend/changes`).then(r => r.json()).then(d => {
+            barH("chart-changes", d.map(x => x.label), d.map(x => x.value));
+        });
+
+        fetch(`${API}/api/search/kpi`).then(r => r.json()).then(d => {
+            pie("chart-ratio", ["No Change", "Changed"], [d.unchanged, d.changed]);
+        });
+
+        // ── SEGMENT ───────────────────────────────────────────────────────────────────
+        fetch(`${API}/api/content/segment`).then(r => r.json()).then(d => {
+            pie("chart-seg-pie", d.map(x => x.label), d.map(x => x.value));
+            barV("chart-seg-bar", d.map(x => x.label), d.map(x => x.value));
+        });
+    </script>
+</body>
+
+</html>
