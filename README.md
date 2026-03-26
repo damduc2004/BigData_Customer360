@@ -1,4 +1,4 @@
-#Customer Behavior Analytics
+# Customer Behavior Analytics
 
 Hệ thống phân tích hành vi khách hàng end-to-end cho nền tảng streaming FPT Play.  
 Xử lý dữ liệu bằng **Apache PySpark**, lưu trữ **MySQL**, trực quan hóa bằng **Streamlit**.
