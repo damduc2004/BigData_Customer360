@@ -5,10 +5,10 @@ from pyspark.sql.functions import *
 from pyspark.sql.window import Window
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
-PATH_MAPPING_T6 = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\search_category_t6.csv"
-PATH_MAPPING_T7 = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\search_category_t7.csv"
-PATH_LOG_T6     = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\log_search\202206*"
-PATH_LOG_T7     = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\log_search\202207*"
+PATH_MAPPING_T6 = r"C:\Users\Admin\OneDrive\Desktop\DATA\search_category_t6.csv"
+PATH_MAPPING_T7 = r"C:\Users\Admin\OneDrive\Desktop\DATA\search_category_t7.csv"
+PATH_LOG_T6     = r"C:\Users\Admin\OneDrive\Desktop\DATA\log_search\202206*"
+PATH_LOG_T7     = r"C:\Users\Admin\OneDrive\Desktop\DATA\log_search\202207*"
 
 MYSQL_HOST  = "localhost"
 MYSQL_PORT  = "3306"

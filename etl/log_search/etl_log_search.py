@@ -5,10 +5,10 @@ from pyspark.sql.functions import *
 from pyspark.sql.window import Window
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
-PATH_T6       = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\log_search\202206*"
-PATH_T7       = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\log_search\202207*"
-SAVE_PATH_T6  = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\most_search_t6"
-SAVE_PATH_T7  = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\most_search_t7"
+PATH_T6       = r"C:\Users\Admin\OneDrive\Desktop\DATA\log_search\202206*"
+PATH_T7       = r"C:\Users\Admin\OneDrive\Desktop\DATA\log_search\202207*"
+SAVE_PATH_T6  = r"C:\Users\Admin\OneDrive\Desktop\DATA\most_search_t6"
+SAVE_PATH_T7  = r"C:\Users\Admin\OneDrive\Desktop\DATA\most_search_t7"
 
 spark = SparkSession.builder.appName("ETL_LogSearch").getOrCreate()
 

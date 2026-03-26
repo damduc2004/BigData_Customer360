@@ -8,7 +8,7 @@ from pyspark.sql.window import Window
 import pyspark.sql.functions as sf
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────────
-BASE_PATH   = r"C:\Users\Admin\OneDrive\Desktop\BigData_Gen15\DATA\log_content"
+BASE_PATH   = r"C:\Users\Admin\OneDrive\Desktop\DATA\log_content"
 MYSQL_HOST  = "localhost"
 MYSQL_PORT  = "3306"
 MYSQL_USER  = "root"
