@@ -9,18 +9,30 @@ Xử lý dữ liệu bằng **Apache PySpark**, lưu trữ **MySQL**, trực qua
 
 ```
 Raw Data
-├── log_content/   (JSON, daily)       → etl_content.py  → MySQL: customer_content_stats
-├── log_search/    (Parquet, T6 & T7)  → etl_search.py   → MySQL: customer_search_stats
-└── Customer_Transaction.csv           → etl_rfm.py      → MySQL: customer_rfm_stats
-                                                               ↓
-                                                        Streamlit Dashboard (3 tabs)
+├── log_content/{YYYYMMDD}.json  → etl/content_analytics/etl_content.py
+├── log_search/202206*, 202207*  → etl/search_analytics/etl_log_search.py + etl_search_stats.py
+├── mapping CSV (keyword → genre) → etl/search_analytics/mapping.py
+└── Customer_Transaction.csv      → etl/rfm_analytics/etl_rfm.py
+                      ↓
+                  MySQL: customer_content_stats / customer_search_stats / customer_rfm_stats
+                      ↓
+                  Streamlit Dashboard (web_app/app.py)
 ```
 
 ## 📂 Cấu trúc project
 
 ```
-BigData_UserBehavior/
+BigData_Customer360/
 ├── README.md
+├── docs/
+│   ├── images/
+│   │   ├── output-rfm.png
+│   │   ├── output-content.png
+│   │   └── output-search.png
+│   └── reports/
+│       ├── Module1_Content_Report.pdf
+│       ├── Module2_Search_Report.pdf
+│       └── Module3_RFM_Report.pdf
 ├── etl/
 │   ├── content_analytics/
 │   │   └── etl_content.py          # ETL log xem nội dung
