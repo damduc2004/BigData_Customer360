@@ -22,13 +22,13 @@ Raw Data
 BigData_UserBehavior/
 ├── README.md
 ├── etl/
-│   ├── log_content/
+│   ├── content_analytics/
 │   │   └── etl_content.py          # ETL log xem nội dung
-│   ├── log_search/
+│   ├── search_analytics/
 │   │   ├── etl_log_search.py       # Trích xuất top keyword mỗi user
 │   │   ├── etl_search_stats.py     # Mapping genre + trend T6→T7
 │   │   └── mapping.py              # LLM-based keyword → genre classification
-│   └── monetary/
+│   └── rfm_analytics/
 │       ├── etl_rfm.py              # RFM scoring & segmentation
 │       └── ETL_pipeline.ipynb      # Notebook phân tích (dev/exploration)
 └── web_app/
@@ -39,7 +39,7 @@ BigData_UserBehavior/
 
 ## 📦 3 Module ETL
 
-### Module 1 — Content Analytics (`etl/log_content/etl_content.py`)
+### Module 1 — Content Analytics (`etl/content_analytics/etl_content.py`)
 
 | Item | Chi tiết |
 |------|----------|
@@ -55,7 +55,7 @@ BigData_UserBehavior/
 5. `Taste` = concat các thể loại có duration > 0 (nối `-`)
 6. `Active` = "High" nếu active_days > 4, ngược lại "Low"
 
-### Module 2 — Search Analytics (`etl/log_search/`)
+### Module 2 — Search Analytics (`etl/search_analytics/`)
 
 | Item | Chi tiết |
 |------|----------|
@@ -70,7 +70,7 @@ BigData_UserBehavior/
 4. Pivot theo tháng → `Most_Searched_T6/T7`, `Genre_T6/T7`
 5. `Changing` = "No Change" nếu genre không đổi, ngược lại "{T6} -> {T7}"
 
-### Module 3 — RFM Analysis (`etl/monetary/etl_rfm.py`)
+### Module 3 — RFM Analysis (`etl/rfm_analytics/etl_rfm.py`)
 
 | Item | Chi tiết |
 |------|----------|
@@ -102,6 +102,17 @@ streamlit run web_app/app.py
 | **🎬 Content Behavior** | Thời lượng theo thể loại, MostWatch, Active vs Low, Top Taste |
 | **🔍 Search Trends** | Genre T6 vs T7, Top Changing trends, Sankey flow T6→T7 |
 
+### 📸 Output Samples
+
+#### 1) RFM Segments
+![RFM Output](docs/images/output-rfm.png)
+
+#### 2) Content Behavior
+![Content Output](docs/images/output-content.png)
+
+#### 3) Search Trends
+![Search Output](docs/images/output-search.png)
+
 ---
 
 ## ⚙️ Cài đặt & Chạy
@@ -124,14 +135,14 @@ CREATE DATABASE IF NOT EXISTS bigdata;
 ### 3. Chạy ETL pipeline
 ```bash
 # Module 1: Content
-python etl/log_content/etl_content.py
+python etl/content_analytics/etl_content.py
 
 # Module 2: Search
-python etl/log_search/etl_log_search.py
-python etl/log_search/etl_search_stats.py
+python etl/search_analytics/etl_log_search.py
+python etl/search_analytics/etl_search_stats.py
 
 # Module 3: RFM
-python etl/monetary/etl_rfm.py
+python etl/rfm_analytics/etl_rfm.py
 ```
 
 ### 4. Khởi động Dashboard
